@@ -1,7 +1,6 @@
-/** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ['class'],
-  content: ['./src/client/**/*.{ts,tsx,js,jsx}'],
+  content: ['./src/client/**/*.{ts,tsx,js,jsx}', './dist/*.html'],
   prefix: '',
   theme: {
     container: {
@@ -15,12 +14,15 @@ module.exports = {
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
-        ring: 'hsl(var(--ring))',
+        // ring: 'hsl(var(--ring))',
+        ring: 'none',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
+          disabled: 'hsl(var(--primary-disabled))',
+          disabledLight: 'hsl(var(--primary-disabled-light))',
         },
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
@@ -61,12 +63,19 @@ module.exports = {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' },
         },
+        gradient: {
+          to: { 'background-position': '200% center' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        gradient: 'gradient 2s linear infinite',
       },
     },
   },
   plugins: [require('tailwindcss-animate')],
 };
+
+// #88c5ff  -> blue
+// #d2e2fd  -> light blue

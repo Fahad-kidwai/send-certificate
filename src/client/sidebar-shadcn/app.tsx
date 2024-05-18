@@ -2,6 +2,7 @@ import React from 'react';
 import { MyAccordion } from '../components/my-accordion';
 import { MyDrawer } from '../components/my-drawer';
 import { MyAlert } from '../components/my-alert';
+import { Switch } from '../components/ui/switch';
 
 export const App = () => {
   return (
@@ -16,6 +17,7 @@ export const App = () => {
       <div>
         <MyAlert />
       </div>
+      <Switch />
     </div>
   );
 };

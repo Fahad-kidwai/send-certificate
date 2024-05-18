@@ -201,9 +201,17 @@ const DynamicCdnWebpackPluginConfig = {
           version: packageVersion,
           url: `https://unpkg.com/@types/react@${packageVersion}/index.d.ts`,
         };
+      // case 'react-router-dom':
+      //   return {
+      //     name: packageName,
+      //     var: 'ReactRouterDOM',
+      //     version: packageVersion,
+      //     // url: `https://unpkg.com/browse/react-router-dom@${packageVersion}/umd/react-router-dom.min.js`,
+      //     url: `https://unpkg.com/react-router-dom@${packageVersion}/dist/react-router-dom.production.min.js`,
+      //   };
       // return defaults/null depending if Dynamic CDN plugin finds package
-      default:
-        return moduleDetails;
+      // default:
+      //   return moduleDetails;
     }
   },
 };
@@ -295,7 +303,7 @@ const serverConfig = {
   mode: isProd ? 'production' : 'none',
   entry: serverEntry,
   output: {
-    filename: 'code.js',
+    filename: 'webpack_code.js',
     path: destination,
     libraryTarget: 'this',
     publicPath,
@@ -328,7 +336,7 @@ const serverConfig = {
     ],
   },
   optimization: {
-    minimize: true,
+    // minimize: true,
     minimizer: [
       new TerserPlugin({
         terserOptions: {
@@ -349,6 +357,7 @@ const serverConfig = {
             comments: /@customfunction/,
           },
         },
+        parallel: true,
       }),
     ],
   },

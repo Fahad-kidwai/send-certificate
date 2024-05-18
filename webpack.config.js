@@ -111,6 +111,9 @@ const clientConfig = ({ isDevClientWrapper }) => ({
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
+    alias: {
+      '@': path.resolve(__dirname, 'src/client'),
+    },
   },
   module: {
     rules: [
@@ -310,6 +313,9 @@ const serverConfig = {
   },
   resolve: {
     extensions: ['.ts', '.js', '.json', '.jsx', '.tsx'],
+    alias: {
+      '@': path.resolve(__dirname, 'src/client'),
+    },
   },
   module: {
     rules: [

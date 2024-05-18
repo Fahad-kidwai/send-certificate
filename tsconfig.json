@@ -3,7 +3,12 @@
     "types": ["gas-types-detailed"],
     "jsx": "react",
     "esModuleInterop": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"]
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "baseUrl": "src/client",
+    "paths": {
+      "@/*": ["./*"]
+    }
+    
     // "strict": true,
 
     // "noUnusedLocals": true,

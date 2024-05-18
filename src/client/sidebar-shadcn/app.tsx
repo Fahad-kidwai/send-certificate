@@ -1,8 +1,9 @@
 import React from 'react';
-import { MyAccordion } from '../components/my-accordion';
-import { MyDrawer } from '../components/my-drawer';
-import { MyAlert } from '../components/my-alert';
-import { Switch } from '../components/ui/switch';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { MyAccordion } from '@/components/my-accordion';
+import { MyDrawer } from '@/components/my-drawer';
+import { MyAlert } from '@/components/my-alert';
 
 export const App = () => {
   return (
@@ -18,6 +19,7 @@ export const App = () => {
         <MyAlert />
       </div>
       <Switch />
+      <Textarea placeholder="Type your message here." />
     </div>
   );
 };

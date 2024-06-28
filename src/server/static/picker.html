@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+</head>
+
+<body>
+
+</body>
+
+</html>
+<div
+    style="position:absolute;top:0;right:0;bottom:0;left:0;text-align:center; color: #222; font: 13px/18px arial, sans-serif;">
+    <span style="position: absolute;top: 50%;left: 50%;margin-top: -18px;margin-left: -82px">Fetching slides.<br>
+        Please wait a few seconds...<span>
+</div>
+<? if(triggerId !== '-'){ ?>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<? } ?>
+
+<script>
+    var triggerId = '<?!=triggerId?>';
+    var pickerType = '<?!=type?>';
+
+    var DIALOG_DIMENSIONS = {
+        width: 640,
+        height: 410
+    };
+    var pickerApiLoaded = false;
+
+
+    function showPicker() {
+        google.script.run.withSuccessHandler(createPicker)
+            .withFailureHandler(alert).getOAuthToken();
+    }
+
+    function onApiLoad() {
+        gapi.load('picker', {
+            'callback': function () {
+                pickerApiLoaded = true;
+                if (triggerId !== '-') {
+                    showPicker();
+                }
+            }
+        });
+    }
+
+    function createPicker(token) {
+        if (pickerApiLoaded && token) {
+            if (pickerType === 'file') {
+                var slidesView = new google.picker.DocsView(google.picker.ViewId.PRESENTATIONS);
+                slidesView.setMode(google.picker.DocsViewMode.LIST)
+                var picker = new google.picker.PickerBuilder()
+                    .addView(slidesView)
+                    .setOAuthToken(token)
+                    .hideTitleBar()
+                    .setSize(DIALOG_DIMENSIONS.width - 2, DIALOG_DIMENSIONS.height - 2)
+                    .setCallback(pickerCallback)
+                    .setOrigin('https://docs.google.com')
+                    .enableFeature(google.picker.Feature.SUPPORT_DRIVES)
+                    .enableFeature(google.picker.Feature.NAV_HIDDEN)
+                    .build();
+                picker.setVisible(true);
+            } else if (pickerType === 'folder') {
+                var driveView = new google.picker.DocsView(google.picker.ViewId.DOCS)
+                    .setIncludeFolders(true)
+                    .setMimeTypes('application/vnd.google-apps.folder')
+                    .setSelectFolderEnabled(true);
+                var sharedDriveView = new google.picker.DocsView()
+                    .setIncludeFolders(true)
+                    .setEnableDrives(true)
+                    .setSelectFolderEnabled(true);
+                var picker = new google.picker.PickerBuilder()
+                    .addView(driveView)
+                    .addView(sharedDriveView)
+                    .setOAuthToken(token)
+                    .setSize(DIALOG_DIMENSIONS.width - 2, DIALOG_DIMENSIONS.height - 2)
+                    .setCallback(pickerCallback)
+                    .setOrigin('https://docs.google.com')
+                    // .enableFeature(google.picker.Feature.SUPPORT_DRIVES)
+                    .hideTitleBar()
+                    .build();
+                picker.setVisible(true);
+            }
+        } else {
+            alert('Unable to load the file picker.');
+        }
+
+    }
+
+    /**
+     * A callback function that extracts the chosen document's metadata from the
+     * response object. For details on the response object, see
+     * https://developers.google.com/picker/docs/result
+     *
+     * @param {object} data The response object.
+     */
+
+    function pickerCallback(data) {
+        var action = data.action;
+        if (action == 'picked' || action == google.picker.Action.CANCEL) {
+            if (pickerType === 'file' || pickerType === 'folder') {
+                google.script.run.withSuccessHandler(google.script.host.close)
+                    .setPickedFile(triggerId, JSON.stringify(data));
+            } else if (pickerType === 'upload') {
+                console.log('data', data);
+            }
+        } else {
+            console.log('action', action);
+        }
+    }
+</script>
+<script src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>

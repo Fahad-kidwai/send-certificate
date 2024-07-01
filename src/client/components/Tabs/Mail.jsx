@@ -3,15 +3,19 @@ import { Button } from '../ui/button';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { serverFunctions } from '@/utils/serverFunctions';
+import { useApp } from "../../contexts";
+
 
 const Mail = () => {
-  const [senderName, setSenderName] = useState('');
-  const [cc, setCc] = useState('');
-  const [bcc, setBcc] = useState('');
-  const [mailSubject, setMailSubject] = useState('');
-  const [mailBody, setMailBody] = useState('');
-  const [failedSubject, setFailedSubject] = useState('');
-  const [failedBody, setFailedBody] = useState('');
+  const {info,updateInfo} = useApp()
+  const [senderName, setSenderName] = useState(info.senderName);
+  const [cc, setCc] = useState(info.cc);
+  const [bcc, setBcc] = useState(info.bcc);
+  const [mailSubject, setMailSubject] = useState(info.mailSubject);
+  const [mailBody, setMailBody] = useState(info.mailBody);
+  const [failedSubject, setFailedSubject] = useState(info.failedSubject);
+  const [failedBody, setFailedBody] = useState(info.failedBody);
+
 
   const saveMailSettings = () => {
     console.log(
@@ -20,9 +24,19 @@ const Mail = () => {
       bcc,
       mailSubject,
       mailBody,
+      failedSubject,
       failedBody,
-      failedSubject
     );
+    const inputs = {
+      senderName,
+      cc,
+      bcc,
+      mailSubject,
+      mailBody,
+      failedSubject,
+      failedBody,
+    }
+    serverFunctions.saveMailInfo(inputs)
   };
 
   return (
@@ -37,6 +51,7 @@ const Mail = () => {
           id="sName"
           onChange={(e) => {
             setSenderName(e.target.value);
+            updateInfo({senderName : e.target.value})
           }}
           value={senderName}
         />
@@ -47,6 +62,7 @@ const Mail = () => {
           id="cc"
           onChange={(e) => {
             setCc(e.target.value);
+            updateInfo({cc : e.target.value})
           }}
           value={cc}
         />
@@ -57,6 +73,7 @@ const Mail = () => {
           id="bcc"
           onChange={(e) => {
             setBcc(e.target.value);
+            updateInfo({bcc : e.target.value})
           }}
           value={bcc}
         />
@@ -67,6 +84,7 @@ const Mail = () => {
           id="pSubject"
           onChange={(e) => {
             setMailSubject(e.target.value);
+            updateInfo({mailSubject : e.target.value})
           }}
           value={mailSubject}
         />
@@ -77,6 +95,7 @@ const Mail = () => {
           id="pContent"
           onChange={(e) => {
             setMailBody(e.target.value);
+            updateInfo({mailBody : e.target.value})
           }}
           value={mailBody}
         />
@@ -87,6 +106,7 @@ const Mail = () => {
           id="fSubject"
           onChange={(e) => {
             setFailedSubject(e.target.value);
+            updateInfo({failedSubject : e.target.value})
           }}
           value={failedSubject}
         />
@@ -97,6 +117,7 @@ const Mail = () => {
           id="fContent"
           onChange={(e) => {
             setFailedBody(e.target.value);
+            updateInfo({failedBody : e.target.value})
           }}
           value={failedBody}
         />

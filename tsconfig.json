@@ -7,9 +7,9 @@
     "baseUrl": "src/client",
     "paths": {
       "@/*": ["./*"]
-    }
+    },
     
-    // "strict": true,
+    "strict": false,
 
     // "noUnusedLocals": true,
     // "noUnusedParameters": true

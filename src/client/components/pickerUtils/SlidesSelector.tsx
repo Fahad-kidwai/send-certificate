@@ -9,7 +9,9 @@ export const SlidesSelector = ({
   setSelectedSlidesName,
   setTriggerID,
   setTemplateID,
+  change,
 }) => {
+  console.log("info in slideSelector",selectedSlidesName)
   const interval = useRef(null);
 
   async function showFilePicker() {
@@ -32,6 +34,7 @@ export const SlidesSelector = ({
           setTriggerID(triggerId);
           setSelectedSlidesName(data?.docs?.[0]?.name || '');
           setTemplateID(data?.docs?.[0]?.id || '')
+          change()
         } else if (data?.action === 'cancel') {
           // setTriggerID('');
           clearInterval(interval.current);

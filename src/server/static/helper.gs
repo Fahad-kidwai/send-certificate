@@ -59,37 +59,38 @@ function switchAddOn(cmd){
   
   function fetchTemplateTags() {
     // id = "1w-jwGt2Cx3E6NLpCiBiXObSj19369N8s0iA54oe3n64";
-    let id = PropertiesService.getDocumentProperties().getProperty('template');
-    
+    let id =
+      PropertiesService.getDocumentProperties().getProperty('templateID');
+    console.log('Inside Fetch Tags', id);
+
     let pt = SlidesApp.openById(id);
     let slide = pt.getSlides()[0];
     let shapes = slide.getShapes();
-  
-    let allTags = []
-  
+
+    let allTags = [];
+
     shapes.forEach(function (shape) {
-      let regEx = new RegExp("{{\s*(.*?)\s*}}");
+      let regEx = new RegExp('{{s*(.*?)s*}}');
       var text = shape.getText().asString();
       if (text) {
         // console.log(text)
         let r = regEx.exec(text);
         if (r) {
-          allTags.push(r[0]);;
+          allTags.push(r[0]);
         }
       }
-    })
+    });
     console.log(allTags);
     return allTags;
   }
-  
+
   function showDialog(pageName, title) {
+    console.log('dialog');
     var template = HtmlService.createTemplateFromFile(pageName);
-  
+    let html = template.evaluate().setWidth(640).setHeight(520);
+
     FormApp.getUi() // Or DocumentApp or SlidesApp or FormApp.
-      .showModelessDialog(
-        template.evaluate().setWidth(640).setHeight(520),
-        title
-      );
+      .showModalDialog(html, title);
   }
   
   function getAnswerByQuestionTitle(response, questionTitle) {

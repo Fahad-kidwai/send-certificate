@@ -45,6 +45,14 @@ function onOpen(e) {
     FormApp.getUi().showSidebar(ui);
     // setUp()
   }
+
+  // function showTagsDialog() { // not needed as Helper has a overloaded function for this
+  //   const title = 'Tags Dialog';
+  //   var template = HtmlService.createTemplateFromFile('dialog-tags');
+  //   const html = template.evaluate().setWidth(600).setHeight(500);
+  //   FormApp.getUi().showModalDialog(html, title);
+  //   // setUp()
+  // }
   
   function includeFile_(output, name, params) {
     let template = HtmlService.createTemplateFromFile(name);

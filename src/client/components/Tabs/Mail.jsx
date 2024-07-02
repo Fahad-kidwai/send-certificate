@@ -15,7 +15,13 @@ const Mail = () => {
   const [mailBody, setMailBody] = useState(info.mailBody);
   const [failedSubject, setFailedSubject] = useState(info.failedSubject);
   const [failedBody, setFailedBody] = useState(info.failedBody);
+  const [isDisable, setIsDisable] = useState(false);
 
+  const showTags = async () => {
+    setIsDisable(true);
+    await serverFunctions.showDialog('dialog-tags', 'Tags Dialog');
+    setIsDisable(false);
+  };
 
   const saveMailSettings = () => {
     console.log(
@@ -25,7 +31,7 @@ const Mail = () => {
       mailSubject,
       mailBody,
       failedSubject,
-      failedBody,
+      failedBody
     );
     const inputs = {
       senderName,
@@ -35,14 +41,15 @@ const Mail = () => {
       mailBody,
       failedSubject,
       failedBody,
-    }
-    serverFunctions.saveMailInfo(inputs)
+    };
+    serverFunctions.saveMailInfo(inputs);
   };
 
   return (
     <div className=" overflow-auto">
-      <Button className=" w-full">Merge Tags</Button>
-
+      <Button className=" w-full" disabled={isDisable} onClick={showTags}>
+        Merge Tags
+      </Button>
       <div id="form">
         <Label htmlFor="sName" className=" mt-1">
           Sender Name
@@ -51,7 +58,7 @@ const Mail = () => {
           id="sName"
           onChange={(e) => {
             setSenderName(e.target.value);
-            updateInfo({senderName : e.target.value})
+            updateInfo({ senderName: e.target.value });
           }}
           value={senderName}
         />
@@ -62,7 +69,7 @@ const Mail = () => {
           id="cc"
           onChange={(e) => {
             setCc(e.target.value);
-            updateInfo({cc : e.target.value})
+            updateInfo({ cc: e.target.value });
           }}
           value={cc}
         />
@@ -73,7 +80,7 @@ const Mail = () => {
           id="bcc"
           onChange={(e) => {
             setBcc(e.target.value);
-            updateInfo({bcc : e.target.value})
+            updateInfo({ bcc: e.target.value });
           }}
           value={bcc}
         />
@@ -84,7 +91,7 @@ const Mail = () => {
           id="pSubject"
           onChange={(e) => {
             setMailSubject(e.target.value);
-            updateInfo({mailSubject : e.target.value})
+            updateInfo({ mailSubject: e.target.value });
           }}
           value={mailSubject}
         />
@@ -95,7 +102,7 @@ const Mail = () => {
           id="pContent"
           onChange={(e) => {
             setMailBody(e.target.value);
-            updateInfo({mailBody : e.target.value})
+            updateInfo({ mailBody: e.target.value });
           }}
           value={mailBody}
         />
@@ -106,7 +113,7 @@ const Mail = () => {
           id="fSubject"
           onChange={(e) => {
             setFailedSubject(e.target.value);
-            updateInfo({failedSubject : e.target.value})
+            updateInfo({ failedSubject: e.target.value });
           }}
           value={failedSubject}
         />
@@ -117,7 +124,7 @@ const Mail = () => {
           id="fContent"
           onChange={(e) => {
             setFailedBody(e.target.value);
-            updateInfo({failedBody : e.target.value})
+            updateInfo({ failedBody: e.target.value });
           }}
           value={failedBody}
         />

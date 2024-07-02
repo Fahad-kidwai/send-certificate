@@ -52,6 +52,12 @@ const clientEntrypoints = [
     filename: 'sidebar-shadcn-ui',
     template: './src/client/sidebar-shadcn/index.html',
   },
+  {
+    name: 'CLIENT - dialog-tags',
+    entry: './src/client/dialog-tags/index.js',
+    filename: 'dialog-tags',
+    template: './src/client/dialog-tags/index.html',
+  },
 ];
 
 // define certificate locations

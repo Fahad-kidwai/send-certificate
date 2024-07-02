@@ -15,18 +15,24 @@ import { SlidesSelector } from '../pickerUtils/SlidesSelector';
 import { serverFunctions } from '../../utils/serverFunctions';
 import { useApp } from "../../contexts";
 
-
 const Certificate = () => {
-  const {info,updateInfo} = useApp()
-  console.log("info in certificate",info)
+  const { info, updateInfo } = useApp();
+  console.log('info in certificate', info);
   const [triggerID, setTriggerID] = useState('');
-  const [selectedSlidesName, setSelectedSlidesName] = useState(info.selectedSlidesName);
+  const [selectedSlidesName, setSelectedSlidesName] = useState(
+    info.selectedSlidesName
+  );
   const [templateID, setTemplateID] = useState(info.templateID);
   const [passingScore, setPassingScore] = useState(info.passingScore);
   const [fileFormat, setFileFormat] = useState(info.fileFormat);
   const [dateFormat, setDateFormat] = useState(info.dateFormat);
-  
+  const [isDisable, setIsDisable] = useState(false);
 
+  const showTags = async () => {
+    setIsDisable(true);
+    await serverFunctions.showDialog('dialog-tags', 'Tags Dialog');
+    setIsDisable(false);
+  };
 
   const saveCertificateSettings = () => {
     console.log(
@@ -44,13 +50,15 @@ const Certificate = () => {
       dateFormat,
     };
 
-    serverFunctions.saveCertificateInfo(inputs)
+    serverFunctions.saveCertificateInfo(inputs);
+    serverFunctions.fetchTemplateTags();
   };
 
   return (
     <div className=" overflow-auto">
-      <Button className=" w-full">Merge Tags</Button>
-
+      <Button className=" w-full" disabled={isDisable} onClick={showTags}>
+        Merge Tags
+      </Button>
       <div id="form">
         <div>
           <Label htmlFor="passing" className=" mt-1">
@@ -60,7 +68,7 @@ const Certificate = () => {
             value={passingScore}
             onValueChange={(val) => {
               setPassingScore(val);
-              updateInfo({passingScore: val})
+              updateInfo({ passingScore: val });
             }}
           >
             <SelectTrigger className="w-[260px]">
@@ -86,7 +94,7 @@ const Certificate = () => {
           setSelectedSlidesName={setSelectedSlidesName}
           setTriggerID={setTriggerID}
           setTemplateID={setTemplateID}
-          change = {() => updateInfo({selectedSlidesName,templateID})}
+          change={() => updateInfo({ selectedSlidesName, templateID })}
         />
         {/* <Input id="template" type="file" className="w-[260px]"/> */}
         <Label htmlFor="fileFormat" className=" mt-1">
@@ -96,7 +104,7 @@ const Certificate = () => {
           value={fileFormat}
           onValueChange={(val) => {
             setFileFormat(val);
-            updateInfo({fileFormat: val})
+            updateInfo({ fileFormat: val });
           }}
         >
           <SelectTrigger className="w-[260px]">
@@ -115,7 +123,7 @@ const Certificate = () => {
           value={dateFormat}
           onValueChange={(val) => {
             setDateFormat(val);
-            updateInfo({dateFormat: val})
+            updateInfo({ dateFormat: val });
           }}
         >
           <SelectTrigger className="w-[260px]">

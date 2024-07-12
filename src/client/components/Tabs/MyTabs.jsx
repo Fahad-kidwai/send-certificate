@@ -8,28 +8,14 @@ import { serverFunctions } from '@/utils/serverFunctions';
 import { AppProvider } from '../../contexts';
 
 const MyTabs = () => {
-  // const [info, setInfo] = useState<Record<string, any>>({})
-  // useEffect(() => {
-  //   const fetchInfo =  async ()=> {
-  //     const properties = await serverFunctions.getAllProperties()
-  //     console.log("info in myTabs",properties)
-  //     setInfo(properties)
-  //     console.log(info)
-  //   }
-  //   fetchInfo()
-  //   console.log("info in myTabs 1",info)
-  // }, [])
-
   const [info, setInfo] = useState({});
 
   const getInfo = async () => {
     const properties = await serverFunctions.getAllProperties();
-    console.log('info in App', properties);
     setInfo(properties);
   };
 
   const updateInfo = (prop) => {
-    console.log('prop', prop);
     setInfo((prev) => ({ ...prev, ...prop }));
   };
 
@@ -39,28 +25,30 @@ const MyTabs = () => {
 
   return (
     <AppProvider value={{ info, getInfo, updateInfo }}>
-      <div className="overflow-hidden pb-4">
-        <Tabs defaultValue="send" className="">
-          <TabsList className=" w-full">
-            <TabsTrigger value="send">Send</TabsTrigger>
-            <TabsTrigger value="mail">Mail</TabsTrigger>
-            <TabsTrigger value="certificate">Certificate</TabsTrigger>
-            <TabsTrigger value="records">Records</TabsTrigger>
-          </TabsList>
-          <TabsContent value="send" className=" px-4 ">
-            <Send />
-          </TabsContent>
-          <TabsContent value="mail" className=" px-4 ">
-            <Mail />
-          </TabsContent>
-          <TabsContent value="certificate" className=" px-4 ">
-            <Certificate />
-          </TabsContent>
-          <TabsContent value="records" className=" px-4 ">
-            <Record />
-          </TabsContent>
-        </Tabs>
-      </div>
+      {/* <div className="overflow-hidden pb-4"> */}
+      <Tabs defaultValue="mail" className=" ">
+        <TabsList className=" w-full flex justify-around rounded-none">
+          {/* <TabsTrigger value="send">Send</TabsTrigger> */}
+          <TabsTrigger value="mail">Mail</TabsTrigger>
+          <TabsTrigger value="certificate">Certificate</TabsTrigger>
+          {/* <TabsTrigger value="records">Records</TabsTrigger> */}
+        </TabsList>
+        {/* <TabsContent value="send" className=" px-4 ">
+          <Send />
+        </TabsContent> */}
+        <TabsContent value="mail" className="px-4  m-0">
+          <Send />
+          <Mail />
+        </TabsContent>
+        <TabsContent value="certificate" className="px-4 m-0">
+          <Send />
+          <Certificate />
+        </TabsContent>
+        <TabsContent value="records" className=" px-4 ">
+          <Record />
+        </TabsContent>
+      </Tabs>
+      {/* </div> */}
     </AppProvider>
   );
 };

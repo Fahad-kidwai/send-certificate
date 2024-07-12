@@ -43,119 +43,101 @@ function onOpen(e) {
       .evaluate()
       .setTitle('Send Certificate');
     FormApp.getUi().showSidebar(ui);
-    // setUp()
+    // setUp();
+    // Trigger For onSubmit
+    const triggers = ScriptApp.getProjectTriggers();
+    if (triggers.length > 1) {
+      ScriptApp.newTrigger('onFormSubmit')
+        .forForm(FormApp.getActiveForm())
+        .onFormSubmit()
+        .create();
+    }
   }
 
-  // function showTagsDialog() { // not needed as Helper has a overloaded function for this
-  //   const title = 'Tags Dialog';
-  //   var template = HtmlService.createTemplateFromFile('dialog-tags');
-  //   const html = template.evaluate().setWidth(600).setHeight(500);
-  //   FormApp.getUi().showModalDialog(html, title);
-  //   // setUp()
-  // }
-  
   function includeFile_(output, name, params) {
     let template = HtmlService.createTemplateFromFile(name);
     if (params) {
       Object.keys(params).forEach(function (key) {
         template[key] = params[key];
-      })
+      });
     }
     output.$out.append(template.evaluate().getContent());
   }
-  
-  
-  
+
   function onFormSubmit(e) {
     let info = PropertiesService.getDocumentProperties().getProperties();
     if (info.addOn === 'false') {
-      console.log("Add-on is turned off");
-      return
+      console.log('Add-on is turned off');
+      return;
     }
-    let reachedPoints = 0
-    let certificate
-    let systemGeneratedTags = ['Reached Percentage', 'Reached Points', 'Form Name', 'Date'] // system generated tags List
-    let response = e.response
-    let email = response.getRespondentEmail()
-    let gradableItemsResponses = response.getGradableItemResponses()
-  
-    let passingPercentage = info.passing;
-    let format = info.format;
-    let templateID = info.template;
+    let reachedPoints = 0;
+    let certificate;
+    let systemGeneratedTags = [
+      'Reached Percentage',
+      'Reached Points',
+      'Form Name',
+      'Date',
+    ]; // system generated tags List
+    let response = e.response;
+    let email = response.getRespondentEmail();
+    let gradableItemsResponses = response.getGradableItemResponses();
+
+    let passingPercentage = info.passingScore;
+    let fileFormat = info.fileFormat;
+    let templateID = info.templateID;
     let senderName = info.senderName;
     let dateFormat = info.dateFormat;
-    console.log({ templateID }, format, passingPercentage, senderName, dateFormat)
-  
-  
-    for (gradableItemsResponse of gradableItemsResponses) { // returns all the items from response
-      let point = gradableItemsResponse.getScore()
-      console.log(`${gradableItemsResponse.getItem().getTitle()}
-         score ${gradableItemsResponse.getScore()}`);
-      reachedPoints += (point)
+
+    for (gradableItemsResponse of gradableItemsResponses) {
+      // returns all the items from response
+      let point = gradableItemsResponse.getScore();
+      reachedPoints += point;
     }
-    let totalPoints = gradableItemsResponses.length - 1; // Score calculation is static, ASK
-    let formName = FormApp.getActiveForm().getTitle();
-  
-    let date = Utilities.formatDate(new Date(), "GMT", dateFormat); //new Date(response.getTimestamp())
-    // date = `${date.getDate()} ${date.toLocaleString('default', { month: 'long' })}, ${date.getFullYear()}`
-    
-    // let responderName = response.getItemResponses()[0].getResponse() //certificate name is static, ASK
-    let reachedPercentage = reachedPoints / totalPoints * 100;
-  
-    console.log(reachedPoints, totalPoints, date, formName, reachedPercentage)
-  
-    let tags = JSON.parse(info.tags);
+    let totalPoints = gradableItemsResponses.length; // Score calculation is static, ASK
+    let formName = DriveApp.getFileById(
+      FormApp.getActiveForm().getId()
+    ).getName();
+
+    let date = Utilities.formatDate(new Date(), 'GMT', dateFormat);
+    let reachedPercentage = (reachedPoints / totalPoints) * 100;
+
+    let tags = JSON.parse(info.mergedTags);
     for (let i = 0; i < tags.length; i++) {
       if (systemGeneratedTags.includes(tags[i][0])) {
-        console.log(tags[i][0], typeof tags[i][0])
-        console.log("stags", systemGeneratedTags[i], typeof systemGeneratedTags[i])
         if (tags[i][0] === systemGeneratedTags[0]) {
           tags[i][0] = reachedPercentage;
-        }
-        else if (tags[i][0] === systemGeneratedTags[1]) {
+        } else if (tags[i][0] === systemGeneratedTags[1]) {
           tags[i][0] = reachedPoints;
-        }
-        else if (tags[i][0] === systemGeneratedTags[2]) {
+        } else if (tags[i][0] === systemGeneratedTags[2]) {
           tags[i][0] = formName;
-        }
-        else if (tags[i][0] === systemGeneratedTags[3]) {
+        } else if (tags[i][0] === systemGeneratedTags[3]) {
           tags[i][0] = date;
         }
-      }
-      else {
-        let answer = getAnswerByQuestionTitle(response, tags[i][0]) // to be contd
+      } else {
+        let answer = getAnswerByQuestionTitle(response, tags[i][0]);
         if (answer) {
-          // console.log({answer});
-          tags[i][0] = answer
-        }
-        else {
-          // console.log("no answer");
+          tags[i][0] = answer;
+        } else {
           continue;
         }
       }
     }
-  
-    console.log({ tags })
+
     let subject;
     let mailBody;
     if (reachedPercentage >= passingPercentage) {
-      console.log("passed")
-      certificate = generateCertificate(tags, templateID, format);
+      certificate = generateCertificate(tags, templateID, fileFormat, formName);
       subject = info.mailSubject;
       mailBody = info.mailBody;
-      // mailBody = mailBody.replace('Reached Points', reachedPoints) // previous code
-      // mailBody = mailBody.replace('Total Points', totalPoints)
     } else {
       subject = info.failedSubject;
       mailBody = info.failedBody;
     }
     tags.forEach(function (tag) {
-      subject = subject.replace(tag[1], tag[0])
-      mailBody = mailBody.replace(tag[1], tag[0])
-    })
-  
-  
-  
+      subject = subject.replace(tag[1], tag[0]);
+      mailBody = mailBody.replace(tag[1], tag[0]);
+    });
+
     MailApp.sendEmail({
       to: email,
       subject: subject,
@@ -164,39 +146,31 @@ function onOpen(e) {
       attachments: certificate ? certificate : null,
     });
   }
-  
-  
-  
+
   // function generateCertificate(responderName, formName, reachedPercentage, passingPercentage, date) {
-  function generateCertificate(tags, templateID, format) {
+  function generateCertificate(tags, templateID, fileFormat, formName) {
     let template = DriveApp.getFileById(templateID);
-    let folder = DriveApp.getFolderById("1F-jL3AaFgUPHak_UVcZ8_zMGFrKd1gZ0"); // need to change the folder  ID, ASK
-    let templateCopy = template.makeCopy("responderName", folder);
-  
+    let folder = DriveApp.getFolderById('1F-jL3AaFgUPHak_UVcZ8_zMGFrKd1gZ0'); // need to change the folder  ID, ASK
+    let templateCopy = template.makeCopy(formName, folder); // ask
+
     let id = templateCopy.getId();
-  
+
     let pt = SlidesApp.openById(id);
     let slide = pt.getSlides()[0];
     let shapes = slide.getShapes();
-  
+
     shapes.forEach(function (shape) {
       var text = shape.getText();
-      console.log({ text });
       if (text) {
         tags.forEach(function (tag) {
           text.replaceAllText(tag[1], tag[0]);
-        })
-        // text.replaceAllText("{{Full Name}}", responderName);
-        // text.replaceAllText("{{Form Name}}", formName);
-        // text.replaceAllText("{{Reached Score}}", reachedPercentage);
-        // text.replaceAllText("{{Passing Score}}", passingPercentage);
-        // text.replaceAllText("{{Date}}", date);
+        });
       }
-    })
+    });
     pt.saveAndClose();
-    let attachment = folder.createFile(templateCopy.getAs(format));
-    templateCopy.setTrashed(true)
-    return attachment
+    let attachment = folder.createFile(templateCopy.getAs(fileFormat));
+    templateCopy.setTrashed(true);
+    return attachment;
   }
   
   

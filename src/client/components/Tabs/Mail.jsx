@@ -24,15 +24,6 @@ const Mail = () => {
   };
 
   const saveMailSettings = () => {
-    console.log(
-      senderName,
-      cc,
-      bcc,
-      mailSubject,
-      mailBody,
-      failedSubject,
-      failedBody
-    );
     const inputs = {
       senderName,
       cc,
@@ -46,12 +37,12 @@ const Mail = () => {
   };
 
   return (
-    <div className=" overflow-auto">
-      <Button className=" w-full" disabled={isDisable} onClick={showTags}>
+    <div className="">
+      <Button className=" w-full mt-1" disabled={isDisable} onClick={showTags}>
         Merge Tags
       </Button>
       <div id="form">
-        <Label htmlFor="sName" className=" mt-1">
+        <Label htmlFor="sName" className=" pt-1">
           Sender Name
         </Label>
         <Input
@@ -128,12 +119,11 @@ const Mail = () => {
           }}
           value={failedBody}
         />
-        <div className="flex justify-center">
-          <Button className=" mt-2" onClick={saveMailSettings}>
-            Save Mail Settings
-          </Button>
-        </div>
       </div>
+
+      <Button className=" w-full mt-2" onClick={saveMailSettings}>
+        Save Mail Settings
+      </Button>
     </div>
   );
 };

@@ -1,17 +1,18 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Button } from '../ui/button';
 import { serverFunctions } from '../../utils/serverFunctions';
 import { X } from 'lucide-react';
 import { toast } from 'sonner';
+import { useApp } from '../../contexts';
 
 export const SlidesSelector = ({
-  selectedSlidesName,
   setSelectedSlidesName,
-  setTriggerID,
+  setTemplateUrl,
   setTemplateID,
+  setTriggerID,
   change,
 }) => {
-  console.log("info in slideSelector",selectedSlidesName)
+  const { info } = useApp();
   const interval = useRef(null);
 
   async function showFilePicker() {
@@ -20,7 +21,6 @@ export const SlidesSelector = ({
     }
 
     const triggerId = crypto.randomUUID();
-    console.log(triggerId);
 
     try {
       await serverFunctions.showFilePicker(triggerId, 'file');
@@ -28,22 +28,24 @@ export const SlidesSelector = ({
       interval.current = setInterval(async () => {
         const res = await serverFunctions.getPickedFile(triggerId);
         const data = JSON.parse(res);
-        console.log('data: ', data);
         if (data?.action === 'picked') {
           clearInterval(interval.current);
           setTriggerID(triggerId);
           setSelectedSlidesName(data?.docs?.[0]?.name || '');
-          setTemplateID(data?.docs?.[0]?.id || '')
-          change()
+          setTemplateUrl(data?.docs?.[0]?.url || '');
+          setTemplateID(data?.docs?.[0]?.id || '');
+          change(
+            data?.docs?.[0]?.name || '',
+            data?.docs?.[0]?.url || '',
+            data?.docs?.[0]?.id || ''
+          );
         } else if (data?.action === 'cancel') {
           // setTriggerID('');
           clearInterval(interval.current);
         }
       }, 2000);
-      // console.log('Res1:', res1);
       // const res = await serverFunctions.getPickedFile(triggerId);
     } catch (error) {
-      console.log('Error Here');
       console.error(error);
       // toast.error(error.message);
     }
@@ -52,6 +54,7 @@ export const SlidesSelector = ({
   const handleRemoveSelectedSheet = (e) => {
     e.stopPropagation();
     setSelectedSlidesName('');
+    change('', '', '');
     setTriggerID('');
   };
 
@@ -67,15 +70,20 @@ export const SlidesSelector = ({
         <div className="flex justify-between gap-2">
           <div className="flex gap-3 flex-auto">
             <img src="https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.presentation" />
-            {selectedSlidesName ? (
-              <span className="whitespace-nowrap overflow-hidden text-ellipsis font-semibold">
-                {selectedSlidesName}
-              </span>
+            {info.selectedSlidesName ? (
+              <a
+                className="whitespace-nowrap overflow-hidden text-ellipsis font-semibold hover:text-blue-600"
+                target="_blank"
+                href={info.templateUrl}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {info.selectedSlidesName}
+              </a>
             ) : (
               <span>Select Slide</span>
             )}
           </div>
-          {selectedSlidesName && (
+          {info.selectedSlidesName && (
             <X size={18} onClick={handleRemoveSelectedSheet} />
           )}
         </div>

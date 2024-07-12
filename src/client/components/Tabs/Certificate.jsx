@@ -22,6 +22,7 @@ const Certificate = () => {
   const [selectedSlidesName, setSelectedSlidesName] = useState(
     info.selectedSlidesName
   );
+  const [templateUrl, setTemplateUrl] = useState(info.templateUrl);
   const [templateID, setTemplateID] = useState(info.templateID);
   const [passingScore, setPassingScore] = useState(info.passingScore);
   const [fileFormat, setFileFormat] = useState(info.fileFormat);
@@ -35,16 +36,10 @@ const Certificate = () => {
   };
 
   const saveCertificateSettings = () => {
-    console.log(
-      { selectedSlidesName },
-      { templateID },
-      { passingScore },
-      { fileFormat },
-      { dateFormat }
-    );
     const inputs = {
       selectedSlidesName,
       templateID,
+      templateUrl,
       passingScore,
       fileFormat,
       dateFormat,
@@ -55,13 +50,14 @@ const Certificate = () => {
   };
 
   return (
-    <div className=" overflow-auto">
-      <Button className=" w-full" disabled={isDisable} onClick={showTags}>
+    <div className="h-full">
+      <Button className=" w-full mt-1" disabled={isDisable} onClick={showTags}>
         Merge Tags
       </Button>
+
       <div id="form">
         <div>
-          <Label htmlFor="passing" className=" mt-1">
+          <Label htmlFor="passing" className=" pt-1">
             Passing
           </Label>
           <Select
@@ -90,13 +86,19 @@ const Certificate = () => {
           Template
         </Label>
         <SlidesSelector
-          selectedSlidesName={selectedSlidesName}
+          info={info}
           setSelectedSlidesName={setSelectedSlidesName}
+          setTemplateUrl={setTemplateUrl}
           setTriggerID={setTriggerID}
           setTemplateID={setTemplateID}
-          change={() => updateInfo({ selectedSlidesName, templateID })}
+          change={(name, url, Id) => {
+            updateInfo({
+              selectedSlidesName: name,
+              templateID: Id,
+              templateUrl: url,
+            });
+          }}
         />
-        {/* <Input id="template" type="file" className="w-[260px]"/> */}
         <Label htmlFor="fileFormat" className=" mt-1">
           File Format
         </Label>
@@ -111,8 +113,8 @@ const Certificate = () => {
             <SelectValue placeholder="Select format" />
           </SelectTrigger>
           <SelectContent className="">
-            <SelectItem value="pdf">PDF</SelectItem>
-            <SelectItem value="img">IMG</SelectItem>
+            <SelectItem value="application/pdf">PDF</SelectItem>
+            <SelectItem value="image/png">IMG</SelectItem>
           </SelectContent>
         </Select>
         <Label htmlFor="dateFormat" className=" mt-1">
@@ -132,24 +134,17 @@ const Certificate = () => {
           <SelectContent className="">
             <SelectItem value="MM/dd/yyyy">MM/DD/YYYY</SelectItem>
             <SelectItem value="dd/MM/yyyy">DD/MM/YYYY</SelectItem>
-            <SelectItem value="MM-DD-YYYY">MM-DD-YYYY</SelectItem>
-            <SelectItem value="DD-MM-YYYY">DD-MM-YYYY</SelectItem>
-            <SelectItem value="MM.DD.YYYY">MM.DD.YYYY</SelectItem>
-            <SelectItem value="DD.MM.YYYY">DD.MM.YYYY</SelectItem>
+            <SelectItem value="MM-dd-YYYY">MM-DD-YYYY</SelectItem>
+            <SelectItem value="dd-MM-YYYY">DD-MM-YYYY</SelectItem>
+            <SelectItem value="MM.dd.YYYY">MM.DD.YYYY</SelectItem>
+            <SelectItem value="dd.MM.YYYY">DD.MM.YYYY</SelectItem>
           </SelectContent>
         </Select>
-        {/* <Label htmlFor='pContent'>Mail Content - if passed</Label>
-      <Input id='pContent' />
-      <Label htmlFor='fSubject'>Mail Subject - if failed</Label>
-      <Input id='fSubject' />
-      <Label htmlFor='fContent'>Mail Content - if failed</Label>
-      <Input id='fContent' /> */}
-        <div className="flex justify-center">
-          <Button className=" mt-2" onClick={saveCertificateSettings}>
-            Save Certificate Settings
-          </Button>
-        </div>
       </div>
+
+      <Button className=" w-full  mt-1 " onClick={saveCertificateSettings}>
+        Save Certificate Settings
+      </Button>
     </div>
   );
 };

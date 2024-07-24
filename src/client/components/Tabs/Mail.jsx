@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { serverFunctions } from '@/utils/serverFunctions';
-import { useApp } from "../../contexts";
-
-
+import { useApp, AppContext } from '../../contexts';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const Mail = () => {
-  const {info,updateInfo} = useApp()
+  const { info, updateInfo } = useContext(AppContext);
   const [senderName, setSenderName] = useState(info.senderName);
   const [cc, setCc] = useState(info.cc);
   const [bcc, setBcc] = useState(info.bcc);
@@ -16,6 +16,7 @@ const Mail = () => {
   const [failedSubject, setFailedSubject] = useState(info.failedSubject);
   const [failedBody, setFailedBody] = useState(info.failedBody);
   const [isDisable, setIsDisable] = useState(false);
+  const [settingDisabled, setSettingDisabled] = useState(false);
 
   const showTags = async () => {
     setIsDisable(true);
@@ -23,7 +24,19 @@ const Mail = () => {
     setIsDisable(false);
   };
 
-  const saveMailSettings = () => {
+  const saveMailSettings = async () => {
+    setSettingDisabled(true);
+    if (
+      !senderName ||
+      !mailSubject ||
+      !mailBody ||
+      !failedSubject ||
+      !failedBody
+    ) {
+      setSettingDisabled(false);
+      toast.warning('Fill out all the fields');
+      return;
+    }
     const inputs = {
       senderName,
       cc,
@@ -33,8 +46,14 @@ const Mail = () => {
       failedSubject,
       failedBody,
     };
-    serverFunctions.saveMailInfo(inputs);
+    await serverFunctions.saveMailInfo(inputs);
+    setSettingDisabled(false);
+    toast.success('Settings saved');
   };
+
+  // useEffect(() => {
+  //   console.log('effect', info);
+  // }, [info]);
 
   return (
     <div className="">
@@ -51,7 +70,7 @@ const Mail = () => {
             setSenderName(e.target.value);
             updateInfo({ senderName: e.target.value });
           }}
-          value={senderName}
+          value={info.senderName}
         />
         <Label htmlFor="cc" className=" mt-1">
           CC
@@ -62,7 +81,7 @@ const Mail = () => {
             setCc(e.target.value);
             updateInfo({ cc: e.target.value });
           }}
-          value={cc}
+          value={info.cc}
         />
         <Label htmlFor="bcc" className=" mt-1">
           BCC
@@ -73,7 +92,7 @@ const Mail = () => {
             setBcc(e.target.value);
             updateInfo({ bcc: e.target.value });
           }}
-          value={bcc}
+          value={info.bcc}
         />
         <Label htmlFor="pSubject" className=" mt-1">
           Mail Subject - if passed
@@ -84,7 +103,7 @@ const Mail = () => {
             setMailSubject(e.target.value);
             updateInfo({ mailSubject: e.target.value });
           }}
-          value={mailSubject}
+          value={info.mailSubject}
         />
         <Label htmlFor="pContent" className=" mt-1">
           Mail Content - if passed
@@ -95,7 +114,7 @@ const Mail = () => {
             setMailBody(e.target.value);
             updateInfo({ mailBody: e.target.value });
           }}
-          value={mailBody}
+          value={info.mailBody}
         />
         <Label htmlFor="fSubject" className=" mt-1">
           Mail Subject - if failed
@@ -106,7 +125,7 @@ const Mail = () => {
             setFailedSubject(e.target.value);
             updateInfo({ failedSubject: e.target.value });
           }}
-          value={failedSubject}
+          value={info.failedSubject}
         />
         <Label htmlFor="fContent" className=" mt-1">
           Mail Content - if failed
@@ -117,11 +136,15 @@ const Mail = () => {
             setFailedBody(e.target.value);
             updateInfo({ failedBody: e.target.value });
           }}
-          value={failedBody}
+          value={info.failedBody}
         />
       </div>
 
-      <Button className=" w-full mt-2" onClick={saveMailSettings}>
+      <Button
+        className=" w-full mt-2 mb-2"
+        disabled={settingDisabled}
+        onClick={saveMailSettings}
+      >
         Save Mail Settings
       </Button>
     </div>

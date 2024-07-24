@@ -11,11 +11,27 @@
   }
 
   function test() {
-    let info = PropertiesService.getDocumentProperties().getProperties();
+    // let info = PropertiesService.getDocumentProperties().deleteAllProperties();
+    // let totalPoints = 0;
+    // let items = FormApp.getActiveForm().getItems();
+    // for (let i = 0; i < items.length; i++) {
+    //   let item = items[i];
+    //   // console.log(item)
+    //   let temp;
+    //   console.log(item.getType().name());
+    //   if (item.getType().name() == 'MULTIPLE_CHOICE') {
+    //     temp = item.asMultipleChoiceItem();
+    //   } else if (item.getType().name() == 'TEXT') {
+    //     temp = item.asTextItem();
+    //   }
+    //   totalPoints += temp.getPoints();
+    // }
+    // console.log('total', totalPoints);
   }
 
   function saveTags(arr, setAll = false) {
     if (setAll) {
+      console.log('setall');
       PropertiesService.getDocumentProperties().setProperty(
         'mergedTags',
         JSON.stringify(arr)
@@ -52,12 +68,17 @@
   function fetchTemplateTags() {
     let id =
       PropertiesService.getDocumentProperties().getProperty('templateID');
-
+    let allTags = [];
+    if (!id) {
+      PropertiesService.getDocumentProperties().setProperty(
+        'templateTags',
+        allTags
+      );
+      throw new Error('Choose Template to fetch tags');
+    } //
     let pt = SlidesApp.openById(id);
     let slide = pt.getSlides()[0];
     let shapes = slide.getShapes();
-
-    let allTags = [];
 
     shapes.forEach(function (shape) {
       let regEx = new RegExp('{{s*(.*?)s*}}');
@@ -79,6 +100,7 @@
 
   function getAllProperties() {
     let info = PropertiesService.getDocumentProperties().getProperties();
+    console.log(info);
     return info;
   }
 
@@ -106,10 +128,11 @@
       .showModalDialog(html, title);
   }
 
-  function showFilePicker(triggerId, type) {
+  function showFilePicker(triggerId, type, name) {
     var template = HtmlService.createTemplateFromFile('picker');
     template.triggerId = triggerId;
     template.type = type;
+    template.name = name;
     FormApp.getUi().showModalDialog(
       template.evaluate().setWidth(640).setHeight(482),
       type === 'file' ? 'Select a slide' : 'Select parent folder'

@@ -1,7 +1,8 @@
 function setUp() {
   let form = FormApp.getActiveForm();
-  if (fromTheme.isQuiz()) return;
-  form.setIsQuiz(true).setCollectEmail(true);
+  form.setCollectEmail(true);
+  if (form.isQuiz()) return;
+  form.setIsQuiz(true);
 
   // let nameItem = form.addTextItem()
   // nameItem.setTitle('Name')

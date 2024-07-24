@@ -43,15 +43,18 @@ function onOpen(e) {
       .evaluate()
       .setTitle('Send Certificate');
     FormApp.getUi().showSidebar(ui);
-    // setUp();
+    setUp(); // changes settings
     // Trigger For onSubmit
     const triggers = ScriptApp.getProjectTriggers();
-    if (triggers.length > 1) {
-      ScriptApp.newTrigger('onFormSubmit')
-        .forForm(FormApp.getActiveForm())
-        .onFormSubmit()
-        .create();
-    }
+    triggers.forEach((trigger) => {
+      console.log(trigger.getHandlerFunction());
+      if (!trigger.getHandlerFunction() === 'onFormSubmit') {
+        ScriptApp.newTrigger('onFormSubmit')
+          .forForm(FormApp.getActiveForm())
+          .onFormSubmit()
+          .create();
+      }
+    });
   }
 
   function includeFile_(output, name, params) {
@@ -71,6 +74,7 @@ function onOpen(e) {
       return;
     }
     let reachedPoints = 0;
+    let totalPoints = 0;
     let certificate;
     let systemGeneratedTags = [
       'Reached Percentage',
@@ -87,13 +91,28 @@ function onOpen(e) {
     let templateID = info.templateID;
     let senderName = info.senderName;
     let dateFormat = info.dateFormat;
+    let folderID = info.folderID;
 
     for (gradableItemsResponse of gradableItemsResponses) {
       // returns all the items from response
       let point = gradableItemsResponse.getScore();
       reachedPoints += point;
+
+      let item = gradableItemsResponse.getItem();
+      if (item.getType().name() == 'MULTIPLE_CHOICE') {
+        temp = item.asMultipleChoiceItem();
+      } else if (item.getType().name() == 'TEXT') {
+        temp = item.asTextItem();
+      } else if (item.getType().name() == 'CHECKBOX') {
+        temp = item.asCheckboxItem();
+      } else {
+        temp = item.asTextItem();
+      }
+      totalPoints += temp.getPoints();
     }
-    let totalPoints = gradableItemsResponses.length; // Score calculation is static, ASK
+    console.log('total', totalPoints, 'reached', reachedPoints);
+    // let totalPoints = gradableItemsResponses.length; // Score calculation is static, ASK
+
     let formName = DriveApp.getFileById(
       FormApp.getActiveForm().getId()
     ).getName();
@@ -101,7 +120,7 @@ function onOpen(e) {
     let date = Utilities.formatDate(new Date(), 'GMT', dateFormat);
     let reachedPercentage = (reachedPoints / totalPoints) * 100;
 
-    let tags = JSON.parse(info.mergedTags);
+    let tags = info.mergedTags ? JSON.parse(info.mergedTags) : [];
     for (let i = 0; i < tags.length; i++) {
       if (systemGeneratedTags.includes(tags[i][0])) {
         if (tags[i][0] === systemGeneratedTags[0]) {
@@ -123,10 +142,18 @@ function onOpen(e) {
       }
     }
 
+    // if(tags.length < 1) return //
+
     let subject;
     let mailBody;
     if (reachedPercentage >= passingPercentage) {
-      certificate = generateCertificate(tags, templateID, fileFormat, formName);
+      certificate = generateCertificate(
+        tags,
+        templateID,
+        fileFormat,
+        formName,
+        folderID
+      );
       subject = info.mailSubject;
       mailBody = info.mailBody;
     } else {
@@ -138,7 +165,7 @@ function onOpen(e) {
       mailBody = mailBody.replace(tag[1], tag[0]);
     });
 
-    MailApp.sendEmail({
+    GmailApp.sendEmail(email, subject, mailBody, {
       to: email,
       subject: subject,
       htmlBody: mailBody,
@@ -147,11 +174,16 @@ function onOpen(e) {
     });
   }
 
-  // function generateCertificate(responderName, formName, reachedPercentage, passingPercentage, date) {
-  function generateCertificate(tags, templateID, fileFormat, formName) {
+  function generateCertificate(
+    tags,
+    templateID,
+    fileFormat,
+    formName,
+    folderID
+  ) {
     let template = DriveApp.getFileById(templateID);
-    let folder = DriveApp.getFolderById('1F-jL3AaFgUPHak_UVcZ8_zMGFrKd1gZ0'); // need to change the folder  ID, ASK
-    let templateCopy = template.makeCopy(formName, folder); // ask
+    let folder = DriveApp.getFolderById(folderID);
+    let templateCopy = template.makeCopy(formName, folder);
 
     let id = templateCopy.getId();
 
@@ -160,6 +192,7 @@ function onOpen(e) {
     let shapes = slide.getShapes();
 
     shapes.forEach(function (shape) {
+      // only when string per shape is replaced not more than one ERROR!
       var text = shape.getText();
       if (text) {
         tags.forEach(function (tag) {
@@ -168,9 +201,14 @@ function onOpen(e) {
       }
     });
     pt.saveAndClose();
-    let attachment = folder.createFile(templateCopy.getAs(fileFormat));
-    templateCopy.setTrashed(true);
-    return attachment;
+    try {
+      let attachment = folder.createFile(templateCopy.getAs(fileFormat));
+      templateCopy.setTrashed(true);
+      return attachment;
+    } catch (error) {
+      templateCopy.setTrashed(true);
+      console.log('template format not supported');
+    }
   }
   
   

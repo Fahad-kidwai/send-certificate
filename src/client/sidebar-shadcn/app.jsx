@@ -1,14 +1,16 @@
 import React from 'react';
 import MyTabs from '@/components/Tabs/MyTabs';
-import { AppProvider } from '../contexts';
+import { Toaster } from '@/components/ui/sonner';
 
 export const App = () => {
-  console.log("In app.js file")
+  console.log('In app.js file');
   return (
-
+    <div>
       <div className=" overflow-hidden">
-        <MyTabs  />
+        {/* Context add */}
+        <MyTabs />
       </div>
-
+      <Toaster />
+    </div>
   );
 };

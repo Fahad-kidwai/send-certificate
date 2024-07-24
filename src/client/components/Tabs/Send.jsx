@@ -8,25 +8,27 @@ import { useContext } from 'react';
 
 const Send = () => {
   const { info, updateInfo } = useContext(AppContext);
-  const [isChecked, setIsChecked] = useState(info.addOn == 'true');
+  const [isChecked, setIsChecked] = useState(info.addOn === 'true');
 
   const handleSwitchChange = (c) => {
     setIsChecked(c);
-    updateInfo({ addOn: c });
+    updateInfo({ addOn: String(c) });
     serverFunctions.switchAddOn(c);
   };
 
   useEffect(() => {
-    setIsChecked(info.addOn);
+    console.log('info.addon', info.addOn, typeof info.addOn);
+    console.log('ischecked', isChecked, typeof isChecked);
+    setIsChecked(info.addOn === 'true');
   }, [info.addOn]);
 
   return (
-    <div className=" flex justify-evenly items-center py-2 rounded-md mt-1 bg-gray-200 ">
+    <div className=" flex justify-evenly items-center py-2 bg-gray-200 ">
       {/* <h2 className="">SwAdd-On :</h2> */}
       <Label>Add-On On/Off</Label>
       <Switch
         checked={isChecked}
-        className=" mx-2"
+        className=" mx-2 bg-[#b4b4b7]"
         onCheckedChange={handleSwitchChange}
       />
     </div>

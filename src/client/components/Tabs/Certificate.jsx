@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
-import { Input } from '../ui/input';
 import {
   SelectGroup,
   Select,
@@ -10,24 +9,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
-
 import { SlidesSelector } from '../pickerUtils/SlidesSelector';
+import { FolderSelector } from '../pickerUtils/FolderSelector';
 import { serverFunctions } from '../../utils/serverFunctions';
-import { useApp } from "../../contexts";
+import { useApp } from '../../contexts';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Certificate = () => {
   const { info, updateInfo } = useApp();
-  console.log('info in certificate', info);
-  const [triggerID, setTriggerID] = useState('');
+  console.log(info, 'info in cert');
   const [selectedSlidesName, setSelectedSlidesName] = useState(
     info.selectedSlidesName
   );
-  const [templateUrl, setTemplateUrl] = useState(info.templateUrl);
-  const [templateID, setTemplateID] = useState(info.templateID);
-  const [passingScore, setPassingScore] = useState(info.passingScore);
-  const [fileFormat, setFileFormat] = useState(info.fileFormat);
-  const [dateFormat, setDateFormat] = useState(info.dateFormat);
+  // const [templateUrl, setTemplateUrl] = useState(info.templateUrl);
+  // const [templateID, setTemplateID] = useState(info.templateID);
+  // const [passingScore, setPassingScore] = useState(info.passingScore);
+  // const [fileFormat, setFileFormat] = useState(info.fileFormat);
+  // const [dateFormat, setDateFormat] = useState(info.dateFormat);
+  // const [folderID, setFolderID] = useState(info.folderID);
+  // const [folderName, setFolderName] = useState(info.folderName);
+  // const [folderUrl, setFolderUrl] = useState(info.folderUrl);
   const [isDisable, setIsDisable] = useState(false);
+  const [settingDisabled, setSettingDisabled] = useState(false);
 
   const showTags = async () => {
     setIsDisable(true);
@@ -35,17 +39,38 @@ const Certificate = () => {
     setIsDisable(false);
   };
 
-  const saveCertificateSettings = () => {
+  const saveCertificateSettings = async () => {
+    setSettingDisabled(true);
+    if (
+      !info.selectedSlidesName ||
+      !info.templateID ||
+      !info.templateUrl ||
+      !info.folderID ||
+      !info.folderName ||
+      !info.folderUrl ||
+      !info.passingScore ||
+      !info.fileFormat ||
+      !info.dateFormat
+    ) {
+      setSettingDisabled(false);
+      toast.warning('Fill out all the fields');
+      return;
+    }
     const inputs = {
-      selectedSlidesName,
-      templateID,
-      templateUrl,
-      passingScore,
-      fileFormat,
-      dateFormat,
+      selectedSlidesName: info.selectedSlidesName,
+      templateID: info.templateID,
+      templateUrl: info.templateUrl,
+      folderID: info.folderID,
+      folderName: info.folderName,
+      folderUrl: info.folderUrl,
+      passingScore: info.passingScore,
+      fileFormat: info.fileFormat,
+      dateFormat: info.dateFormat,
     };
-
-    serverFunctions.saveCertificateInfo(inputs);
+    await serverFunctions.saveCertificateInfo(inputs);
+    console.log('setting saved');
+    toast.success('Settings saved');
+    setSettingDisabled(false);
     serverFunctions.fetchTemplateTags();
   };
 
@@ -61,7 +86,7 @@ const Certificate = () => {
             Passing
           </Label>
           <Select
-            value={passingScore}
+            value={info.passingScore}
             onValueChange={(val) => {
               setPassingScore(val);
               updateInfo({ passingScore: val });
@@ -86,10 +111,8 @@ const Certificate = () => {
           Template
         </Label>
         <SlidesSelector
-          info={info}
           setSelectedSlidesName={setSelectedSlidesName}
           setTemplateUrl={setTemplateUrl}
-          setTriggerID={setTriggerID}
           setTemplateID={setTemplateID}
           change={(name, url, Id) => {
             updateInfo({
@@ -99,11 +122,26 @@ const Certificate = () => {
             });
           }}
         />
+        <Label htmlFor="folder" className=" mt-1">
+          Folder
+        </Label>
+        <FolderSelector
+          setFolderID={setFolderID}
+          setFolderName={setFolderName}
+          setFolderUrl={setFolderUrl}
+          change={(name, url, Id) => {
+            updateInfo({
+              folderName: name,
+              folderID: Id,
+              folderUrl: url,
+            });
+          }}
+        />
         <Label htmlFor="fileFormat" className=" mt-1">
           File Format
         </Label>
         <Select
-          value={fileFormat}
+          value={info.fileFormat}
           onValueChange={(val) => {
             setFileFormat(val);
             updateInfo({ fileFormat: val });
@@ -122,7 +160,7 @@ const Certificate = () => {
         </Label>
         {/* <Input id="dateFormat" /> */}
         <Select
-          value={dateFormat}
+          value={info.dateFormat}
           onValueChange={(val) => {
             setDateFormat(val);
             updateInfo({ dateFormat: val });
@@ -142,7 +180,11 @@ const Certificate = () => {
         </Select>
       </div>
 
-      <Button className=" w-full  mt-1 " onClick={saveCertificateSettings}>
+      <Button
+        className=" w-full  mt-2 mb-2"
+        disabled={settingDisabled}
+        onClick={saveCertificateSettings}
+      >
         Save Certificate Settings
       </Button>
     </div>
